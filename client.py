@@ -46,6 +46,17 @@ class Client:
                 self.read_set.append({"item": item, "version": response["version"]})  
                 print(f"Cliente {self.cid}: Leitura de {item} = {response['value']} (versão {response['version']})")  
 
+          
+            response = json.loads(s.recv(1024).decode())
+            
+            if "status" in response and response["status"] == "error":
+                print(f"Cliente {self.cid}: Erro no servidor: {response['message']}")
+                return  # Aborta a operação
+            
+            # Se não houver erro, processa a resposta
+            self.read_set.append({"item": item, "version": response["version"]})
+            print(f"Cliente {self.cid}: Leitura de {item} = {response['value']} (versão {response['version']})")
+
         except Exception as e:  
             print(f"Erro na leitura: {e}")  
 

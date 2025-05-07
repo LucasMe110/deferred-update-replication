@@ -1,19 +1,28 @@
-#server_falha.py
+# server_falha.py
 from server import Server
 import json
 
 class ServerFalha(Server):
+    def sync_with_replicas(self):
+        """Não sincroniza com outras réplicas."""
+        replicas = []  # Lista vazia
+        print("[SINCRONIZAÇÃO] Servidor em modo de falha ignora sincronização.")
+
     def handle_client(self, client_socket):
         try:
             data = client_socket.recv(1024).decode()
             request = json.loads(data)
             
-            # Falha determinística em operações de leitura/escrita
             print(f"[FALHA] Servidor {self.port} rejeitou operação!")
-            client_socket.send(json.dumps({
+            
+            # Resposta padronizada para todas as operações
+            response = {
                 "status": "error",
-                "message": "Servidor em modo de falha."
-            }).encode())
+                "message": "Servidor em modo de falha.",
+                "value": None,
+                "version": -1
+            }
+            client_socket.send(json.dumps(response).encode())
             
         except Exception as e:
             print(f"Erro: {e}")
@@ -21,11 +30,11 @@ class ServerFalha(Server):
             client_socket.close()
 
     def process_commit(self, commit_request):
-        # Bloquear commits sempre!
         print(f"[FALHA] Servidor {self.port} ignorou commit {commit_request['tid']}!")
-        # Não atualizar o banco de dados
+        # Força abort e notifica o cliente
         print(f"ABORT: Transação {commit_request['tid']} abortada (servidor em falha).")
+        return "abort"
 
 if __name__ == "__main__":
-    server = ServerFalha(5003, 6001)  # Porta 5003
+    server = ServerFalha(5003, 6001)
     server.start()
