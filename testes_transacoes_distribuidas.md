@@ -14,10 +14,13 @@ Este documento descreve quatro cenários de teste para um sistema de transaçõe
 
    ```bash
    python sequencer.py
+   ```
+   ```bash
    python server_1.py
+   ```
+   ```bash
    python server_2.py
    ```
-
 2. Execute o cliente 1:
 
    ```bash
@@ -75,4 +78,3 @@ Este documento descreve quatro cenários de teste para um sistema de transaçõe
 
 ---
 
-> **Observação:** Certifique-se de que todas as dependências estão instaladas e os scripts estão no diretório correto antes de iniciar os testes.
