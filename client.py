@@ -65,7 +65,7 @@ class Client:
                     "ws": self.write_set  
                 }  
                 s.send(json.dumps(commit_request).encode())  
-                print(f"Cliente {self.cid}: Commit enviado. Aguardando resultado...")  
+                print(f"\nCliente {self.cid}: Commit enviado (TID: {commit_request['tid']}).")  
 
         except Exception as e:  
             print(f"Erro ao enviar commit: {e}")  
@@ -81,11 +81,4 @@ if __name__ == "__main__":
     client1.execute_transaction([  
         {"type": "read", "item": "x", "delay": 1},  
         {"type": "write", "item": "x", "value": 15, "delay": 2},  
-    ])  
-
-    # Cliente 2: Transação com conflito (executar após client1)  
-    client2 = Client(2, SERVER_PORTS, SEQUENCER_PORT)  
-    client2.execute_transaction([  
-        {"type": "read", "item": "x", "delay": 1},  
-        {"type": "write", "item": "x", "value": 20, "delay": 2},  
     ])  
