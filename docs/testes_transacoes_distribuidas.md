@@ -3,7 +3,7 @@
 Este documento descreve quatro cenários de teste para um sistema de transações distribuídas. Cada cenário tem como objetivo validar um aspecto específico do sistema.
 
 ---
-
+cd C:\workspaceufsc\DISTRIBUIDO\FINAL
 ## Cenário 1: Transação Sem Conflito
 
 **Objetivo:** Mostrar que transações isoladas são efetivadas com sucesso.

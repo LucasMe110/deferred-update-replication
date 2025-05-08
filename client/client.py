@@ -99,13 +99,3 @@ class Client:
             if not (isinstance(e, OSError) and e.winerror == 10038):  
                 print(f"Erro ao enviar commit: {str(e)}")  
 
-if __name__ == "__main__":  
-    SERVER_PORTS = [5001, 5002]  
-    SEQUENCER_PORT = 6001  
-
-    # Exemplo de uso  
-    client = Client(1, SERVER_PORTS, SEQUENCER_PORT)  
-    client.execute_transaction([  
-        {"type": "read", "item": "x"},  
-        {"type": "write", "item": "x", "value": 15}  
-    ])
