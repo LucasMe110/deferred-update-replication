@@ -1,5 +1,5 @@
 # server_falha.py
-from server import Server
+from server import Server  
 import json
 
 class ServerFalha(Server):

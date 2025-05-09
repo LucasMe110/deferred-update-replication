@@ -1,5 +1,6 @@
 # client2.py
 from client import Client
+
 import time
 
 SERVER_PORTS = [5001, 5002]
