@@ -13,7 +13,7 @@ class Client:
         self.read_set = []  
 
     def execute_transaction(self, operations):  
-        selected_server = random.choice(self.server_ports)  
+        selected_server = random.choice(self.server_ports)  #Escolhe aleatoriamente um dos servidores 
         print(f"Cliente {self.cid}: Executando transação no servidor {selected_server}")  
 
         for op in operations:  
@@ -24,7 +24,7 @@ class Client:
             elif op["type"] == "delay":  
                 time.sleep(op["delay"])  
 
-        self.send_commit()  
+        self.send_commit()  #envia o commit ao sequenciador
 
     def handle_read(self, item, server_port):  
         try:  
@@ -73,20 +73,20 @@ class Client:
         self.write_set.append({"item": item, "value": value})  
         print(f"Cliente {self.cid}: Escrita de {item} = {value} (pendente)")  
 
-    def send_commit(self):  
+    def send_commit(self):  #Envia os dados da transação para o sequenciador
         try:  
             commit_request = {  
                 "type": "commit",  
                 "cid": self.cid,  
                 "tid": f"t{random.randint(1000, 9999)}",  
-                "rs": self.read_set,  
-                "ws": self.write_set  
+                "rs": self.read_set,  #read set (o que foi lido)
+                "ws": self.write_set  #write set (o que foi modificado)
             }  
 
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
             s.settimeout(3.0)  
             try:  
-                s.connect(("localhost", self.sequencer_port))  
+                s.connect(("localhost", self.sequencer_port))  #Adicionar o número de sequência global
                 s.send(json.dumps(commit_request).encode())  
                 print(f"Cliente {self.cid}: Commit enviado (TID: {commit_request['tid']}).")  
             except Exception as e:  

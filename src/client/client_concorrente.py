@@ -22,3 +22,6 @@ def cliente_B():
 # Executar em paralelo
 threading.Thread(target=cliente_A).start()
 threading.Thread(target=cliente_B).start()
+
+
+# simula dois clientes concorrendo para modificar o mesmo item (x) ao mesmo tempo.

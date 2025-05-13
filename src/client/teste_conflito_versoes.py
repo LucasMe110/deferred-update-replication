@@ -34,3 +34,10 @@ if __name__ == "__main__":
     # Iniciar Cliente 2 (irá commitar antes do Cliente 1)
     cliente_2_thread = threading.Thread(target=cliente_2)
     cliente_2_thread.start()
+
+
+
+
+#Inicia o Cliente 1 primeiro (ele lê e escreve, mas depois espera 5 segundos).
+#Espera 2 segundos, então inicia o Cliente 2, que rapidamente escreve e envia o commit.
+#Isso significa que o commit do cliente 2 chega primeiro ao sequenciador.

@@ -14,7 +14,7 @@ class Server:
         self.host = "localhost"  
         self.sequencer_port = sequencer_port  
 
-        # Socket para clientes  
+        # Socket para clientes (aceita requisições de leitura e sincronização de clientes ou outras réplicas)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
         self.server_socket.bind((self.host, self.port))  
         self.server_socket.listen(5)  
@@ -36,7 +36,7 @@ class Server:
         self.commit_thread = threading.Thread(target=self.listen_for_commits)  
         self.commit_thread.start()  
 
-    def register_with_sequencer(self):  
+    def register_with_sequencer(self):  #Réplica diz ao sequenciador a porta
         try:  
             reg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
             reg_socket.connect((self.host, self.sequencer_port + 1000))  
@@ -82,7 +82,7 @@ class Server:
                     s.send(json.dumps({"operation": "sync"}).encode())  
                     remote_db = json.loads(s.recv(1024).decode())  
                     for item in remote_db:  
-                        if remote_db[item]["version"] > self.db.get(item, {"version": -1})["version"]:  
+                        if remote_db[item]["version"] > self.db.get(item, {"version": -1})["version"]: #Isso garante que, se outra réplica estiver mais atualizada, esta réplica assume esse valor.
                             self.db[item] = remote_db[item]  
                     print(f"[SINCRONIZAÇÃO] Estado sincronizado com réplica {replica_port}")  
             except Exception as e:  
@@ -97,7 +97,7 @@ class Server:
             self.process_commit(commit_request)  
             conn.close()  
 
-    def process_commit(self, commit_request):  
+    def process_commit(self, commit_request):  #controle de concorrência
         print(f"\n[Servidor {self.port}] Processando commit da transação {commit_request['tid']}:")  
         print(f"Read Set: {commit_request['rs']}")  
         print(f"Write Set: {commit_request['ws']}")  
@@ -105,7 +105,7 @@ class Server:
         abort = False  
         for item in commit_request["rs"]:  
             db_item = self.db.get(item["item"], {"version": -1})  
-            if db_item["version"] > item["version"]:  
+            if db_item["version"] > item["version"]: #verifica a  version
                 print(f"Conflito detectado! Versão local de {item['item']}: {db_item['version']} > versão da transação: {item['version']}")  
                 abort = True  
                 break  

@@ -7,14 +7,14 @@ class Sequencer:
     def __init__(self, port):
         self.port = port
         self.host = "localhost"
-        self.sequence_number = 0
-        self.replica_servers = []  # Lista de servidores replicados registrados
-        self.lock = threading.Lock()
+        self.sequence_number = 0 #contador global
+        self.replica_servers = []  # Lista de replicados 
+        self.lock = threading.Lock() #Evita race conditions
 
-        # Socket para receber commits de clientes
+        # Socket commits
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.bind((self.host, self.port))
-        self.client_socket.listen(5)
+        self.client_socket.listen(5) #ate 5 conexões na fila de espera
         print(f"Sequenciador iniciado em {self.host}:{self.port}")
 
         # Socket para registro de servidores replicados
@@ -23,11 +23,11 @@ class Sequencer:
         self.replica_socket.listen(5)
         print(f"Aguardando registro de servidores em {self.host}:{port + 1000}")
 
-        # Thread para aceitar servidores replicados
+        # Inicia uma thread que escuta continuamente as conexões de servidores replicados
         replica_thread = threading.Thread(target=self.handle_replica_registration)
         replica_thread.start()
 
-    def handle_replica_registration(self):
+    def handle_replica_registration(self): #Armazena informações do servidor para uso posterior (quando enviar commits)
         while True:
             replica_conn, addr = self.replica_socket.accept()
             data = replica_conn.recv(1024).decode()
@@ -45,18 +45,18 @@ class Sequencer:
             
             with self.lock:
                 self.sequence_number += 1
-                commit_request["sequence"] = self.sequence_number
+                commit_request["sequence"] = self.sequence_number #ordem global garantida.
 
-                for replica in self.replica_servers:
+                for replica in self.replica_servers: #Envio para todas as réplicas
                     try:
                         commit_port = replica["commit_port"]
                         replica_commit_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        replica_commit_socket.connect(("localhost", commit_port))  # Usa a porta armazenada!
+                        replica_commit_socket.connect(("localhost", commit_port))  # Usa a porta armazenada
                         replica_commit_socket.send(json.dumps(commit_request).encode())
                         replica_commit_socket.close()
                     except Exception as e:
                         print(f"Erro ao enviar commit para réplica: {e}")
-                        self.replica_servers.remove(replica)
+                        self.replica_servers.remove(replica) #Se falhar, remove a réplica da lista
 
             print(f"Commit sequenciado: {commit_request}")
                 
@@ -65,7 +65,7 @@ class Sequencer:
         finally:
             client_conn.close()
 
-    def start(self):
+    def start(self): # nova thread isso permite que vários commits sejam processados em paralelo.
         while True:
             client_conn, addr = self.client_socket.accept()
             print(f"Commit recebido de {addr}")
@@ -76,5 +76,5 @@ class Sequencer:
             commit_thread.start()
 
 if __name__ == "__main__":
-    sequencer = Sequencer(6001)  # Porta para commits
+    sequencer = Sequencer(6001)  
     sequencer.start()

@@ -8,7 +8,7 @@ class ServerFalha(Server):
         replicas = []  # Lista vazia
         print("[SINCRONIZAÇÃO] Servidor em modo de falha ignora sincronização.")
 
-    def handle_client(self, client_socket):
+    def handle_client(self, client_socket): #Rejeita qualquer requisição de cliente
         try:
             data = client_socket.recv(1024).decode()
             request = json.loads(data)
@@ -35,6 +35,3 @@ class ServerFalha(Server):
         print(f"ABORT: Transação {commit_request['tid']} abortada (servidor em falha).")
         return "abort"
 
-if __name__ == "__main__":
-    server = ServerFalha(5003, 6001)
-    server.start()
